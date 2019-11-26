@@ -10,10 +10,15 @@ namespace Command
     {
         private List<ICommand> onCommands;
         private List<ICommand> offCommands;
+
+        private List<ICommand> prevOnCommands;
+        private List<ICommand> prevOffCommands;
         public RemoteControl()
         {
             onCommands = new List<ICommand>();
             offCommands = new List<ICommand>();
+            prevOnCommands = new List<ICommand>();
+            prevOffCommands = new List<ICommand>();
 
             for(var i = 0; i < 7; i++)
             {
@@ -24,6 +29,9 @@ namespace Command
 
         public void SetCommand(int slot, ICommand onCommand, ICommand offCommand)
         {
+            prevOnCommands.Add(onCommand);
+            prevOffCommands.Add(offCommand);
+
             onCommands[slot] = onCommand;
             offCommands[slot] = offCommand;
         }
@@ -38,14 +46,10 @@ namespace Command
             offCommands[slot].Execute();
         }
 
-        public string ToString
+        public void Undo()
         {
-            get
-            {
-                var offCommands = JsonSerializer.Serialize(this.onCommands);
-                var onCommands = JsonSerializer.Serialize(this.offCommands);
-                return $"onCommands = {onCommands} offCommands = {offCommands}";
-            }
+            onCommands.Remove(prevOnCommands.FindLast());
+            offCommands.Remove(prevOffCommands.FindLast());
         }
     }
 }
